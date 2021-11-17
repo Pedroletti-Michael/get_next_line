@@ -164,7 +164,7 @@ static char	*appendline(char **s)
 		len++;
 	if ((*s)[len] == '\n')
 	{
-		line = ft_strsub(*s, 0, len);
+		line = ft_strsub(*s, 0, len + 1);
 		tmp = ft_strdup(&((*s)[len + 1]));
 		free(*s);
 		*s = tmp;
@@ -214,3 +214,22 @@ char	*get_next_line(int fd)
 	}
 	return (output(s, ret, fd));
 }
+
+/*int main()
+{
+	int	fd;
+
+	fd = open("f", 0);
+	printf("1. /%s\\\n", get_next_line(fd));
+	printf("2. /%s\\\n", get_next_line(fd));
+	printf("3. /%s\\\n", get_next_line(fd));
+	printf("4. /%s\\\n", get_next_line(fd));
+	printf("5. /%s\\\n", get_next_line(fd));
+	printf("6. /%s\\\n", get_next_line(fd));
+	printf("7. /%s\\\n", get_next_line(fd));
+	printf("8. /%s\\\n", get_next_line(fd));
+	printf("9. /%s\\\n", get_next_line(fd));
+	printf("10. /%s\\\n", get_next_line(fd));
+	printf("11. /%s\\\n", get_next_line(fd));
+	close(fd);
+}*/
