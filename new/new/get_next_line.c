@@ -1,5 +1,7 @@
 #include "get_next_line.h"
-//#define BUFFER_SIZE 1
+#ifndef BUFFER_SIZE
+# define BUFFER_SIZE 1
+#endif
 
 int	ft_strlen(const char *str)
 {
@@ -60,7 +62,9 @@ char	*ft_strdup(char *src, int free_needed)
 	else
 		return (NULL);
 	if (free_needed == 1)
-		free(src);
+	{
+		//free(src);
+	}
 	return (ptr);
 }
 
@@ -90,7 +94,7 @@ char	*ft_strjoin(char *a, char *b)
 }
 
 /* This function's going to check if a new line is already on the buffer and if it's true, that's going to return the new line and stock the rest on the static var buf */
-char	*chck_nl(char **buf, int endfile)
+char	*insert_data(char **buf, int endfile)
 {
 	char	*res;
 	int		i;
@@ -118,7 +122,6 @@ char	*chck_nl(char **buf, int endfile)
 		res[i] = (*buf)[i];
 		i++;
 	}
-	res[i] = '\0';
 	*buf = ft_strdup(*buf + (j + 1), 1);
 	return (res);
 }
@@ -137,27 +140,44 @@ int	chck_endfile(char **buf)
 	return (0);
 }
 
+int chck_nwln(char *buf, int len)
+{
+	int	i;
+
+	i = 0;
+	while (i < len)
+	{
+		if (buf[i] == '\n')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
 /* This function's going to read a file while no new line is on the buffer, return the new line and add the surplus into the static var buf */
 char	*rd_file(char **buf, int fd, int endfile)
 {
 	char	*res;
 	char	*tmp;
+	unsigned int	i;
 
+	i = 0;
 	tmp = ft_strdup(*buf, 0);
-	while (read(fd, *buf, BUFFER_SIZE) > 0)
+	while ((endfile = read(fd, *buf, BUFFER_SIZE)) > 0)
 	{
-		if (chck_endfile(buf))
-			endfile = 1;
-		//Verifier si le buf contient un \0 si c'est le cas faire une action special
 		tmp = ft_strjoin(tmp, *buf);
 		//printf("tmp is %c (%i)\n", tmp[2], (int)tmp[2]);
-		res = chck_nl(&tmp, endfile);
-		if (res)
+		if (i == 0)
+			res = insert_data(&tmp, endfile);
+		else
+			res = ft_strjoin(res, insert_data(&tmp, endfile));
+		if (chck_nwln(res, ft_strlen(res)))
 		{
 			*buf = ft_strdup(tmp, 0);
 			free(tmp);
 			return (res);
 		}
+		i++;
 	}
 	free(tmp);
 	return (NULL);
@@ -171,7 +191,7 @@ char	*get_next_line(int fd)
 
 	if (buf)
 	{
-		res = chck_nl(&buf, endfile);
+		res = insert_data(&buf, endfile);
 		if (!res)
 		{
 			res = rd_file(&buf, fd, endfile);
@@ -185,21 +205,20 @@ char	*get_next_line(int fd)
 		buf = malloc(sizeof(char) * (BUFFER_SIZE + 1));
 		res = rd_file(&buf, fd, endfile);
 	}
-	if (endfile && !res)
+	if (!buf)
 	{
 		free(buf);
 	}
-
 	return (res);
 }
 
-/*int main()
+/**int main()
 {
 	int	fd;
 
-	fd = open("41_nos_nl", 0);
+	fd = open("41_no_nl", 0);
 	printf("1. /%s\\\n", get_next_line(fd));
 	printf("2. /%s\\\n", get_next_line(fd));
 	close(fd);
-	return (NULL);
+	return (0);
 }*/

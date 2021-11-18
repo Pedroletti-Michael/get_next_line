@@ -40,7 +40,6 @@ char	*strjoin_style(char *a, char *b)
 	while (*b != '\0')
 		res[i++] = *b++;
 	res[i] = '\0';
-	//free(a);
 	return (res);
 }
 
@@ -111,6 +110,7 @@ char	*sep_str(char *a, int x)
 char	*get_next_line(int fd)
 {
 	char			*buf;
+	char			*debug;
 	static char		*chr;
 	char			*res;
 	int				i;
@@ -127,14 +127,15 @@ char	*get_next_line(int fd)
 		chr = malloc(sizeof(char) * 1);
 		chr[0] = '\0';
 	}
+	debug = chr;
 	while((read_res = read(fd, buf, BUFFER_SIZE)) && i == 0 && read_res > 0)
 	{
 		chr = strjoin_style(chr, buf);
 		if (chck_nwln(chr))
 			i = 1;
 	}
-	//Trouver un moyen de changer la priorité des actions ou alors faire en sorte de rajouter un check afin de verifier si il reste du contenu dans le buffer ou dans le chr
-	if ((read_res == 0 || read_res == -1) && i == 0)
+	// Trouver le moyen de vider la var static a la fin de la lecture de la chaine
+	if ((read_res == 0 || read_res == -1) && chck_nwln(chr) == 0 && ft_strlen(chr) == 1)
 	{
 		free(chr);
 		free(buf);
@@ -144,6 +145,7 @@ char	*get_next_line(int fd)
 	chr = strjoin_style(chr, buf);
 	res = sep_str(chr, 0);
 	chr = sep_str(chr, 1);
+	debug = chr;
 	free(buf);
 	return(res);
 }

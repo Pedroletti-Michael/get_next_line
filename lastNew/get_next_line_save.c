@@ -12,12 +12,12 @@
 
 #include "get_next_line.h"
 #ifndef BUFFER_SIZE
-#define BUFFER_SIZE 1
+# define BUFFER_SIZE 1
 #endif
 
-size_t ft_strlen(const char *str)
+size_t	ft_strlen(const char *str)
 {
-	int size;
+	int	size;
 
 	size = 0;
 	while (str[size] != '\0')
@@ -27,10 +27,12 @@ size_t ft_strlen(const char *str)
 	return (size);
 }
 
-char *ft_calloc(size_t size)
+
+
+char	*ft_strnew(size_t size)
 {
-	char *str;
-	size_t i;
+	char	*str;
+	size_t	i;
 
 	i = 0;
 	str = (char *)malloc(sizeof(*str) * size + 1);
@@ -44,14 +46,14 @@ char *ft_calloc(size_t size)
 	return (str);
 }
 
-char *ft_strsub(char const *s, unsigned int start, size_t len)
+char	*ft_strsub(char const *s, unsigned int start, size_t len)
 {
-	char *subs;
-	size_t i;
+	char	*subs;
+	size_t	i;
 
 	if (s == NULL)
 		return (NULL);
-	subs = ft_calloc(len);
+	subs = ft_strnew(len);
 	if (subs == NULL)
 		return (NULL);
 	i = 0;
@@ -63,17 +65,17 @@ char *ft_strsub(char const *s, unsigned int start, size_t len)
 	return (subs);
 }
 
-char *ft_strdup(const char *s1)
+char	*ft_strdup(const char *s1)
 {
-	int i;
-	int size;
-	char *str;
+	int		i;
+	int		size;
+	char	*str;
 
 	i = 0;
 	size = 0;
 	while (s1[size])
 		size += 1;
-	str = (char *)malloc(sizeof(*str) * size + 1);
+	str = (char*)malloc(sizeof(*str) * size + 1);
 	if (str == NULL)
 		return (NULL);
 	while (i < size)
@@ -85,34 +87,35 @@ char *ft_strdup(const char *s1)
 	return (str);
 }
 
-char	*search_or_del(char **str, int c)
+char	*ft_strchr(const char *s, int c)
 {
-	int	i;
-
-	i = 0;
-	if (c > 0)
+	while (*s)
 	{
-		while ((*str)[i++])
-		{
-			if ((*str)[i] == c)
-				return ((char *)*str);
-		}
-		if ((*str)[++i] == c)
-			return ((char *)*str);
-		return (NULL);
+		if (*s == c)
+			return ((char*)s);
+		s++;
 	}
-	if (str != NULL && *str != NULL)
-	{
-		if (str != NULL)
-		{
-		free(*str);
-		*str = NULL;
-		}
-	}
+	if (*s == c)
+		return ((char*)s);
 	return (NULL);
 }
 
-char *ft_strcpy(char *dst, const char *src)
+void	ft_memdel(void **ap)
+{
+	if (ap != NULL)
+	{
+		free(*ap);
+		*ap = NULL;
+	}
+}
+
+void	ft_strdel(char **as)
+{
+	if (as != NULL && *as != NULL)
+		ft_memdel((void**)as);
+}
+
+char	*ft_strcpy(char *dst, const char *src)
 {
 	int i;
 
@@ -126,27 +129,47 @@ char *ft_strcpy(char *dst, const char *src)
 	return (dst);
 }
 
-char *ft_strjoin(char const *s1, char const *s2)
+char	*ft_strcat(char *dst, const char *src)
 {
-	int strlen;
-	char *str;
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
+	while (dst[i] != '\0')
+		i++;
+	while (src[j] != '\0')
+	{
+		dst[i] = src[j];
+		i++;
+		j++;
+	}
+	dst[i] = '\0';
+	return (dst);
+}
+
+char	*ft_strjoin(char const *s1, char const *s2)
+{
+	int		strlen;
+	char	*str;
 
 	if (!s1 || !s2)
 		return (NULL);
 	strlen = ft_strlen(s1) + ft_strlen(s2);
-	str = ft_calloc(strlen);
+	str = ft_strnew(strlen);
 	if (str == NULL)
 		return (NULL);
 	ft_strcpy(str, s1);
-	ft_strcpy(str + ft_strlen(s1), s2);
+	ft_strcat(str, s2);
 	return (str);
 }
 
-static char *get_line(char **s)
+
+static char	*appendline(char **s)
 {
-	int len;
-	char *tmp;
-	char *line;
+	int		len;
+	char	*tmp;
+	char	*line;
 
 	len = 0;
 	while ((*s)[len] != '\n' && (*s)[len] != '\0')
@@ -158,62 +181,57 @@ static char *get_line(char **s)
 		free(*s);
 		*s = tmp;
 		if ((*s)[0] == '\0')
-			search_or_del(s, -1);
+			ft_strdel(s);
 	}
 	else
 	{
 		line = ft_strdup(*s);
-		search_or_del(s, -1);
+		ft_strdel(s);
 	}
 	return (line);
 }
 
-static char *format_output(char **s, int ret)
+static char	*output(char **s, int ret, int fd)
 {
 	if (ret < 0)
 		return (NULL);
-	else if (ret == 0 && *s == NULL)
+	else if (ret == 0 && s[fd] == NULL)
 		return (NULL);
 	else
-	{
-		return (get_line(s));
-	}
+		return (appendline(&s[fd]));
 }
 
-char *get_next_line(int fd)
+char	*get_next_line(int fd)
 {
-	int ret;
-	static char *s;
-	char buff[BUFFER_SIZE + 1];
-	char *tmp;
-	char *debg;
+	int			ret;
+	static char	*s[4096];
+	char		buff[BUFFER_SIZE + 1];
+	char		*tmp;
 
 	if (fd < 0)
 		return (NULL);
 	while ((ret = read(fd, buff, BUFFER_SIZE)) > 0)
 	{
 		buff[ret] = '\0';
-		if (s == NULL)
-			s = ft_strdup(buff);
+		if (s[fd] == NULL)
+			s[fd] = ft_strdup(buff);
 		else
 		{
-			tmp = ft_strjoin(s, buff);
-			free(s);
-			s = tmp;
+			tmp = ft_strjoin(s[fd], buff);
+			free(s[fd]);
+			s[fd] = tmp;
 		}
-		if (search_or_del(&s, '\n'))
-			break;
+		if (ft_strchr(s[fd], '\n'))
+			break ;
 	}
-	debg = s;
-	printf("\n\ndebug : %s\n\n", s);
-	return (format_output(&s, ret));
+	return (output(s, ret, fd));
 }
 
-int main()
+/*int main()
 {
-	int fd;
+	int	fd;
 
-	fd = open("alternate_line_nl_with_nl", 0);
+	fd = open("f", 0);
 	printf("1. /%s\\\n", get_next_line(fd));
 	printf("2. /%s\\\n", get_next_line(fd));
 	printf("3. /%s\\\n", get_next_line(fd));
@@ -226,4 +244,4 @@ int main()
 	printf("10. /%s\\\n", get_next_line(fd));
 	printf("11. /%s\\\n", get_next_line(fd));
 	close(fd);
-}
+}*/
