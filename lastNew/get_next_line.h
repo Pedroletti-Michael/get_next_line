@@ -17,5 +17,15 @@
 # include <stdio.h>
 # include <fcntl.h>
 
+size_t	ft_strlen(const char *str);
+
+char	*ft_calloc(size_t size);
+
+char	*ft_strsub(char const *s, unsigned int start, size_t len);
+
+char	*ft_strdup(const char *s1);
+
+char	*search_or_del(char **str, int c);
+
 char	*get_next_line(int fd);
 #endif
