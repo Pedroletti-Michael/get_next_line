@@ -86,7 +86,8 @@ char	*get_next_line(int fd)
 
 	if (fd < 0)
 		return (NULL);
-	while ((ret = read(fd, buff, BUFFER_SIZE)) > 0)
+	ret = read(fd, buff, BUFFER_SIZE);
+	while (ret > 0)
 	{
 		buff[ret] = '\0';
 		if (s == NULL)
@@ -99,6 +100,7 @@ char	*get_next_line(int fd)
 		}
 		if (search_or_del(&s, '\n'))
 			break ;
+		ret = read(fd, buff, BUFFER_SIZE);
 	}
 	return (format_output(&s, ret));
 }
